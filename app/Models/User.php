@@ -12,6 +12,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+
 
 class User extends Authenticatable
 {
@@ -62,11 +64,12 @@ class User extends Authenticatable
     }
 
     public function validateForPassportPasswordGrant(string $password): bool
-    {
+    { 
         return Hash::check($password, $this->password);
     }
 
     public function scopeShowUserDetails($query, $id) {
         return $query->where('id', $id);
     }
+
 }
