@@ -64,12 +64,16 @@ class User extends Authenticatable
     }
 
     public function validateForPassportPasswordGrant(string $password): bool
-    { 
+    {
         return Hash::check($password, $this->password);
     }
 
     public function scopeShowUserDetails($query, $id) {
         return $query->where('id', $id);
+    }
+
+    public function scopeCheckUsernameExist($query, $username) {
+        return $query->where('username', $username);
     }
 
 }

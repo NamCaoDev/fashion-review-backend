@@ -1,31 +1,37 @@
+version: '3'
 networks:
   app-network: null
 services:
     nginx:
-       image: nginx:stable-alpine
-       container_name: nginx-fashion-review-app
-       ports:
-           - '81:80'
-       networks:
-           - app-network
-       volumes:
-           - './src:/var/www/html'
-           - './nginx-default.conf:/etc/nginx/conf.d/default.conf'
-       depends_on:
-           - php
-           - mariadb
+        image: 'nginx:stable-alpine'
+        container_name: 'nginx_${APP_NAME}'
+        ports:
+            - '81:80'
+        volumes:
+            - './:/var/www/html'
+            - './nginx-default.conf:/etc/nginx/conf.d/default.conf'
+        depends_on:
+            - php
+        networks:
+            - app-network
     php:
-       image: php:8.2-fpm-alpine
-       container_name: php-fashion-review-app
-       networks:
-           - app-network
+       build:
+         context: .
+         dockerfile: Dockerfile
+       container_name: 'php_${APP_NAME}'
+       ports:
+            - '9000:9000'
+       user: '${UID:-1000}:${GID:-1000}'
        volumes:
-           - './src:/var/www/html'
+            - './:/var/www/html'
+            - './php.ini:/usr/local/etc/php/php.ini'
+       networks:
+            - app-network
     mariadb:
        image: mariadb:11.6.2
        ports:
-          - '3307:3306'
-       container_name: mariadb-fashion-review-app
+            - '3307:3306'
+       container_name: mariadb_${APP_NAME}
        tty: true
        command: --sql_mode=''
        restart: unless-stopped
@@ -35,22 +41,22 @@ services:
             SERVICE_TAGS: dev
             SERVICE_NAME: mariadb
        volumes:
-           - './src:/var/www/html'
+            - './:/var/www/html'
        networks:
-           - app-network
+            - app-network
     composer:
        image: composer:2.2.24
-       container_name: composer-fashion-review-app
-       networks:
-           - app-network
+       container_name: composer_${APP_NAME}
+       working_dir: /var/www/html
        volumes:
-           - './src:/var/www/html'
+            - './:/var/www/html'
+       networks:
+            - app-network
     npm:
        image: node:23
-       container_name: npm-fashion-review-app
-       networks:
-           - app-network
+       container_name: npm_${APP_NAME}
+       working_dir: /var/www/html
        volumes:
-           - './src:/var/www/html'
+            - './:/var/www/html'
 
 
