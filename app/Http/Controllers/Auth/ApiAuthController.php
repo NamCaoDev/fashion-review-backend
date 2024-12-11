@@ -23,7 +23,7 @@ class ApiAuthController extends Controller
             'scope' => '*',
             ...$credentials
         ];
-        $token = (object) Http::asForm()->post(url('http://localhost:8000/oauth/token'), $payload)->json();
+        $token = (object) Http::post(url('/oauth/token'), $payload)->json();
        return $token;
     }
 
