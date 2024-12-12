@@ -6,16 +6,17 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use App\Models\User;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\App;
 use \Illuminate\Support\Facades\Log;
 
 class ApiAuthController extends Controller
 {
     //
-    private function generateOauthToken($credentials) {
+    private function generateOauthToken( $credentials) {
         $payload = [
             'grant_type' => 'password',
             'client_id' => config('auth.passport_grant_password.client_id'),
@@ -23,8 +24,13 @@ class ApiAuthController extends Controller
             'scope' => '*',
             ...$credentials
         ];
-        $token = (object) Http::post(url('/oauth/token'), $payload)->json();
-       return $token;
+        Log::info('payload', $payload);
+        $tokenRequest = Request::create('oauth/token', 'POST', $payload);
+        $tokenRequest->headers->set('Content-Type', 'application/x-www-form-urlencoded');
+
+        $token = App::handle($tokenRequest)->getContent();
+        // $token = (object) Http::asForm()->post(url('/oauth/token'), $payload)->json();
+        return json_decode($token);
     }
 
     public function register (RegisterRequest $request) {
