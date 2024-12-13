@@ -5,40 +5,28 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RefreshTokenRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Support\Facades\App;
 use \Illuminate\Support\Facades\Log;
+use App\Http\Traits\issueTokenTrait;
+use Illuminate\Support\Facades\Auth;
 
 class ApiAuthController extends Controller
 {
     //
-    private function generateOauthToken( $credentials) {
-        $payload = [
-            'grant_type' => 'password',
-            'client_id' => config('auth.passport_grant_password.client_id'),
-            'client_secret' =>config('auth.passport_grant_password.client_secret'),
-            'scope' => '*',
-            ...$credentials
-        ];
-        Log::info('payload', $payload);
-        $tokenRequest = Request::create('oauth/token', 'POST', $payload);
-        $tokenRequest->headers->set('Content-Type', 'application/x-www-form-urlencoded');
-
-        $token = App::handle($tokenRequest)->getContent();
-        // $token = (object) Http::asForm()->post(url('/oauth/token'), $payload)->json();
-        return json_decode($token);
-    }
+    use issueTokenTrait;
 
     public function register (RegisterRequest $request) {
         $passwordNotHash = $request['password'];
         $request['password']=Hash::make($request['password']);
         $request['remember_token'] = Str::random(10);
         $user = User::create($request->toArray());
-        $token = $this->generateOauthToken(['username' => $user->username, 'password' => $passwordNotHash]);
+        $token = $this->issueToken(['username' => $user->username, 'password' => $passwordNotHash]);
         $response = ['token' => $token];
         return response($response, 200);
     }
@@ -54,16 +42,30 @@ class ApiAuthController extends Controller
         if(!$passwordMatch) {
             return response(["error" => "Password wrong!"], 404);
         }
-        $token = $this->generateOauthToken(['username' => $request['username'], 'password' => $request['password']]);
+        $token = $this->issueToken(['username' => $request['username'], 'password' => $request['password']]);
         $response = ['token' => $token];
         return response($response, 200);
     }
 
 
-    public function logout (Request $request) {
+    public function logout(Request $request) {
         $token = $request->user()->token();
         $token->revoke();
-        $response = ['message' => 'You have been successfully logged out!'];
-        return response($response, 200);
+
+        DB::table('oauth_refresh_tokens')
+            ->where('access_token_id', $token->id)
+            ->update(['revoked' => true]);
+
+        $token->revoke();
+
+        return response(["message" => "Logout successfully"], 200);
+    }
+
+    public function refreshToken(RefreshTokenRequest $request) {
+        $refresh_token = $request->refresh_token;
+
+        $new_access_token = $this->issueToken(["refresh_token" => $refresh_token], 'refresh_token');
+
+        return response(["token" => $new_access_token], 200);
     }
 }

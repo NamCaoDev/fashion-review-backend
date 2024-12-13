@@ -11,6 +11,8 @@ Route::prefix('auth')->group(function () {
 
     Route::post('/register', [ApiAuthController::class, 'register']);
 
+    Route::post('/refresh-token', [ApiAuthController::class, 'refreshToken']);
+
     Route::post('/logout', [ApiAuthController::class, 'logout'])->middleware('auth:api');
 });
 
