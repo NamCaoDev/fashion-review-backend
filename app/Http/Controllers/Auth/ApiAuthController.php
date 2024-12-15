@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\BaseController;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
@@ -11,12 +11,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\User;
-use Illuminate\Support\Facades\App;
-use \Illuminate\Support\Facades\Log;
 use App\Http\Traits\issueTokenTrait;
 use Illuminate\Support\Facades\Auth;
 
-class ApiAuthController extends Controller
+class ApiAuthController extends BaseController
 {
     //
     use issueTokenTrait;
@@ -27,8 +25,8 @@ class ApiAuthController extends Controller
         $request['remember_token'] = Str::random(10);
         $user = User::create($request->toArray());
         $token = $this->issueToken(['username' => $user->username, 'password' => $passwordNotHash]);
-        $response = ['token' => $token];
-        return response($response, 200);
+        $response['token'] = $token;
+        return $this->sendResponse($response, 'User register successfully.');
     }
 
 
@@ -43,14 +41,13 @@ class ApiAuthController extends Controller
             return response(["error" => "Password wrong!"], 404);
         }
         $token = $this->issueToken(['username' => $request['username'], 'password' => $request['password']]);
-        $response = ['token' => $token];
-        return response($response, 200);
+        $response['token'] = $token;
+        return $this->sendResponse($response, 'User login successfully');
     }
 
 
     public function logout(Request $request) {
         $token = $request->user()->token();
-        $token->revoke();
 
         DB::table('oauth_refresh_tokens')
             ->where('access_token_id', $token->id)
@@ -58,7 +55,7 @@ class ApiAuthController extends Controller
 
         $token->revoke();
 
-        return response(["message" => "Logout successfully"], 200);
+        return $this->sendResponse(null, 'Logout successfully.');
     }
 
     public function refreshToken(RefreshTokenRequest $request) {
@@ -66,6 +63,13 @@ class ApiAuthController extends Controller
 
         $new_access_token = $this->issueToken(["refresh_token" => $refresh_token], 'refresh_token');
 
-        return response(["token" => $new_access_token], 200);
+        $response['token'] = $new_access_token;
+
+        return $this->sendResponse($response, 'Refresh token successfully');
+    }
+
+    public function getMe() {
+        $user = Auth::user();
+        return $this->sendResponse($user, 'User retrived successfully');
     }
 }

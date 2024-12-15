@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('facebook_id')->nullable();
             $table->boolean('is_banned')->default(false);
             $table->enum('role', ['user', 'admin'])->default('user');
+            $table->boolean('is_super_admin')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password')->nullable();
             $table->rememberToken();

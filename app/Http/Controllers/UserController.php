@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 
-class UserController extends Controller
+class UserController extends BaseController
 {
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['index','show']]);
+        $this->middleware('role:admin')->only(['store', 'destroy']);
+        $this->authorizeResource(User::class);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -15,16 +22,8 @@ class UserController extends Controller
     {
         //
         $userQuery = User::query();
-        $users = $userQuery->paginate(10);
-        return response()->json($users);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $users = $userQuery->with('permissions')->with('posts')->paginate(10);
+        return $this->sendResponse( UserResource::collection($users), 'User retrieved successfully.');
     }
 
     /**
@@ -33,8 +32,8 @@ class UserController extends Controller
     public function store(CreateUserRequest $request)
     {
         //
-        User::create($request->all());
-        return response()->json(["success" => true]);
+        $user = User::create($request->all());
+        return $this->sendResponse(new UserResource($user), 'User created successfully.');
     }
 
     /**
@@ -43,23 +42,9 @@ class UserController extends Controller
     public function show(User $user)
     {
         //
-        if(!$user) {
-            return response()->json(["errors"=> "Not found user" ]);
-        }
-        $userFind = User::showUserDetails($user->id)->get();
-        if(!$userFind) {
-            return response()->json(["errors"=> "Not found user" ]);
-        }
-        return response()->json($userFind);
+        return $this->sendResponse(new UserResource($user), 'User retrieved successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -68,7 +53,7 @@ class UserController extends Controller
     {
         //
         $user->update($request->all());
-        return response()->json(["success"=> true]);
+        return $this->sendResponse(null, 'User updated successfully.');
     }
 
     /**
@@ -77,7 +62,8 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         //
+        $user->posts()->delete();
         $user->delete();
-        return response()->json(["success"=> true]);
+        return $this->sendResponse(null, 'User deleted successfully.');
     }
 }
