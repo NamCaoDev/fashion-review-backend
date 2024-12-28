@@ -6,6 +6,7 @@ use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class UserController extends BaseController
 {
@@ -18,12 +19,44 @@ class UserController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $queryParams = $request->query();
+        $limit = 20;
+        $page = 1;
         $userQuery = User::query();
-        $users = $userQuery->with('permissions')->with('posts')->paginate(10);
-        return $this->sendResponse( UserResource::collection($users), 'User retrieved successfully.');
+        if(isset($queryParams['limit'])) {
+            $limit = (int)$queryParams['limit'];
+        }
+        if(isset($queryParams['page'])) {
+            $page = (int)$queryParams['page'];
+        }
+        if(isset($queryParams['role'])) {
+            $userQuery->findUserByRole(explode('.',$queryParams['role']));
+        }
+        if(isset($queryParams['username'])) {
+            $userQuery->findUserByUsername($queryParams['username']);
+        }
+        if(isset($queryParams['name'])) {
+            $userQuery->findUserByName($queryParams['name']);
+        }
+        if(isset($queryParams['email'])) {
+            $userQuery->findUserByEmail($queryParams['email']);
+        }
+        if(isset($queryParams['is_banned'])) {
+            $arr_cond = [];
+            if(str_contains($queryParams['is_banned'], 'banned')) {
+                array_push($arr_cond, true);
+            }
+            if(str_contains($queryParams['is_banned'], 'no-banned')) {
+                array_push($arr_cond, false);
+            }
+            $userQuery->findUserBanned($arr_cond);
+        }
+        $userCount = $userQuery->count();
+        $users = $userQuery->with('permissions')->with('posts')->latest()->paginate($limit);
+        return $this->sendResponse( ["records" => UserResource::collection($users), "total_records" => $userCount, "current_page" => $page], 'User retrieved successfully.');
     }
 
     /**

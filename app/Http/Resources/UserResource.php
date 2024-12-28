@@ -20,6 +20,8 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'username' => $this->username,
             'facebook_id' => $this->facebook_id,
+            'role' => $this->role,
+            'is_banned' => $this->is_banned,
             'google_id' => $this->google_id,
             'created_at' => $this->created_at->format('d/m/Y'),
             'updated_at' => $this->updated_at->format('d/m/Y'),

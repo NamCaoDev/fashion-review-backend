@@ -53,6 +53,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_super_admin' => 'boolean',
+            'is_banned' => 'boolean'
         ];
     }
 
@@ -78,8 +80,28 @@ class User extends Authenticatable
         return $query->where('id', $id);
     }
 
-    public function scopeCheckUsernameExist($query, $username) {
+    public function scopeCheckUsernameExist($query, string $username) {
         return $query->where('username', $username);
+    }
+
+    public function scopeFindUserByRole($query, $role) {
+        return $query->whereIn('role', $role);
+    }
+
+    public function scopeFindUserByName($query, $name) {
+        return $query->whereLike('name', "$name%");
+    }
+
+    public function scopeFindUserByUsername($query, $username) {
+        return $query->whereLike('username', "$username%");
+    }
+
+    public function scopeFindUserByEmail($query, $email) {
+        return $query->whereLike('email', "$email%");
+    }
+
+    public function scopeFindUserBanned($query, $is_banned) {
+        return $query->whereIn('is_banned', $is_banned);
     }
 
 }
