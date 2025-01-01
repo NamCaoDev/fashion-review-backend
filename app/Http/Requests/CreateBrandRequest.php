@@ -25,7 +25,7 @@ class CreateBrandRequest extends FormRequest
             //
             "name" => "string|required",
             "description" => "string",
-            "type" => "enum:local,global",
+            "type" => "in:local,global",
             'established_at' => "date",
             'founder' => "string",
             'addresses' => 'array',

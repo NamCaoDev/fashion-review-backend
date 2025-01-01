@@ -6,6 +6,7 @@ use App\Http\Requests\CreateBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
 use App\Http\Resources\BrandResource;
 use App\Models\Brand;
+use Illuminate\Http\Request;
 
 class BrandController extends BaseController
 {
@@ -17,12 +18,31 @@ class BrandController extends BaseController
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         //
+        $queryParams = $request->query();
+        $limit = config('app.pagination.limit');
+        $page = config('app.pagination.page');
         $brandQuery = Brand::query();
-        $brands = $brandQuery->paginate(perPage: 10);
-        return $this->sendResponse(BrandResource::collection($brands), 'Brand retrieved successfully.');
+        if(isset($queryParams['limit'])) {
+            $limit = (int)$queryParams['limit'];
+        }
+        if(isset($queryParams['page'])) {
+            $page = (int)$queryParams['page'];
+        }
+        if(isset($queryParams['type'])) {
+            $brandQuery->findBrandByType(explode('.',$queryParams['type']));
+        }
+        if(isset($queryParams['name'])) {
+            $brandQuery->findBrandByName($queryParams['name']);
+        }
+        if(isset($queryParams['founder'])) {
+            $brandQuery->findBrandByFounders($queryParams['founder']);
+        }
+        $brandCount = $brandQuery->count();
+        $brands = $brandQuery->latest()->paginate($limit);
+        return $this->sendResponse( ["records" => BrandResource::collection($brands), "total_records" => $brandCount, "current_page" => $page], 'Brand retrieved successfully.');
     }
 
     /**

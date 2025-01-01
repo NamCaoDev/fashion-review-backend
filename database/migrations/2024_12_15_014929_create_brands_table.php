@@ -20,7 +20,7 @@ return new class extends Migration
             $table->date('established_at')->nullable();
             $table->string('founder')->nullable();
             $table->json('addresses')->nullable();
-            $table->string('logo');
+            $table->string('logo')->default('https://m.yodycdn.com/blog/anh-luffy-yody-vn-65.jpg');
             $table->json('social_links')->nullable();
         });
     }

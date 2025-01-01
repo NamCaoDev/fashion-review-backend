@@ -18,14 +18,14 @@ class BrandResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'created_at' => $this->created_at->format('d/m/Y'),
-            'updated_at' => $this->updated_at->format('d/m/Y'),
             'type' => $this->type,
-            'established_at' => $this->established_at->format('d/m/Y'),
             'founder' => $this->founder,
             'addresses' => $this->addresses,
             'logo' => $this->logo,
-            'social_links' => $this->social_links
+            'social_links' => $this->social_links,
+            'created_at' => $this->created_at?->format('d/m/Y H:i:s') ?? "",
+            'updated_at' => $this->updated_at?->format('d/m/Y H:i:s') ?? "",
+            'established_at' => $this->established_at?->format('d/m/Y H:i:s') ?? ""
         ];
     }
 }

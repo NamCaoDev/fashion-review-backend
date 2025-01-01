@@ -34,4 +34,16 @@ class Brand extends Model
     public function products() {
         return $this->hasMany(Product::class);
     }
+
+    public function scopeFindBrandByName($query, $name) {
+        return $query->whereLike('name', "$name%");
+    }
+
+    public function scopeFindBrandByFounder($query, $founder) {
+        return $query->whereLike('founder', "$founder%");
+    }
+
+    public function scopeFindBrandByType($query, $type) {
+        return $query->whereIn('type', $type);
+    }
 }

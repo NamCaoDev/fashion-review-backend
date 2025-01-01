@@ -23,8 +23,8 @@ class UserController extends BaseController
     {
         //
         $queryParams = $request->query();
-        $limit = 20;
-        $page = 1;
+        $limit = config('app.pagination.limit');
+        $page = config('app.pagination.page');
         $userQuery = User::query();
         if(isset($queryParams['limit'])) {
             $limit = (int)$queryParams['limit'];
