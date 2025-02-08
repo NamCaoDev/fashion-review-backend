@@ -22,6 +22,7 @@ class BrandResource extends JsonResource
             'founder' => $this->founder,
             'addresses' => $this->addresses,
             'logo' => $this->logo,
+            'products_count' => $this->whenCounted('products'),
             'social_links' => $this->social_links,
             'created_at' => $this->created_at?->format('d/m/Y H:i:s') ?? "",
             'updated_at' => $this->updated_at?->format('d/m/Y H:i:s') ?? "",

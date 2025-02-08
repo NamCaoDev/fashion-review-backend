@@ -18,8 +18,6 @@ class ProductResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'created_at' => $this->created_at->format('d/m/Y'),
-            'updated_at' => $this->updated_at->format('d/m/Y'),
             'images' => $this->images,
             'origin_price' => $this->origin_price,
             'current_price' => $this->current_price,
@@ -28,7 +26,9 @@ class ProductResource extends JsonResource
             'product_type' => $this->product_type,
             'in_stock' => $this->in_stock,
             'buy_links' => $this->buy_links,
-            'brand_id' => $this->brand_id
+            'brand' => $this->brand,
+            'created_at' => $this->created_at?->format('d/m/Y H:i:s') ?? "",
+            'updated_at' => $this->updated_at?->format('d/m/Y H:i:s') ?? "",
         ];
     }
 }

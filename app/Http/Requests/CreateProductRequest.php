@@ -26,14 +26,14 @@ class CreateProductRequest extends FormRequest
             "name" => "string|required",
             "description" => "string",
             'images' => 'array',
-            'origin_price' => 'number|required',
-            'current_price' => 'number|required',
+            'origin_price' => 'numeric|required',
+            'current_price' => 'numeric|required',
             'material' => 'string',
             'price_symbol' => 'string',
             'product_type' => 'string|required',
             'in_stock' => 'boolean|required',
             'buy_links' => 'array',
-            'brand_id' => 'uuid'
+            'brand_id' => 'uuid|required'
         ];
     }
 }

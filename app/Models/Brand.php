@@ -23,6 +23,8 @@ class Brand extends Model
         'social_links'
     ];
 
+    protected $withCount = 'products';
+
     protected function casts(): array
     {
         return [

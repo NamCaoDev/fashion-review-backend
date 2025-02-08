@@ -38,9 +38,10 @@ class BrandController extends BaseController
             $brandQuery->findBrandByName($queryParams['name']);
         }
         if(isset($queryParams['founder'])) {
-            $brandQuery->findBrandByFounders($queryParams['founder']);
+            $brandQuery->findBrandByFounder($queryParams['founder']);
         }
         $brandCount = $brandQuery->count();
+
         $brands = $brandQuery->latest()->paginate($limit);
         return $this->sendResponse( ["records" => BrandResource::collection($brands), "total_records" => $brandCount, "current_page" => $page], 'Brand retrieved successfully.');
     }

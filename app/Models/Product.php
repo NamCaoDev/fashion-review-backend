@@ -41,4 +41,16 @@ class Product extends Model
         return $this->hasMany(Post::class);
     }
 
+    public function scopeFindProductByName($query, $name) {
+        return $query->whereLike('name', "$name%");
+    }
+
+    public function scopeFindProductByType($query, $type) {
+        return $query->whereIn('type', $type);
+    }
+
+    public function scopeFindProductByBrandId($query, $brand_id) {
+        return $query->where('brand_id', $brand_id);
+    }
+
 }
